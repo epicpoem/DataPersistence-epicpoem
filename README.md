@@ -1,5 +1,9 @@
 # DataPersistence PoC
 
+> 📋 **[WORKLOG.md](Document/WORKLOG.md)**
+>
+> 교육과정 내 개인 프로젝트이기에, AI 활용 이력 / Harness 도입 / 테스트 적용 / 클린 코드 수행 증빙 목적으로 WORKLOG.md를 여기에 제출합니다.
+
 반도체 시료 생산주문관리 시스템 — 데이터 영속성 처리 개념 검증 (Proof of Concept)
 
 ## 프로젝트 개요
