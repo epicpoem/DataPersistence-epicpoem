@@ -148,11 +148,15 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="JsonOrderRepository.h" />
     <ClInclude Include="JsonSampleRepository.h" />
+    <ClInclude Include="Order.h" />
+    <ClInclude Include="OrderRepository.h" />
     <ClInclude Include="Sample.h" />
     <ClInclude Include="SampleRepository.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="JsonOrderRepository.cpp" />
     <ClCompile Include="JsonSampleRepository.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>

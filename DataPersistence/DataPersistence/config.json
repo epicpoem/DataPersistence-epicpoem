@@ -1,3 +1,4 @@
 {
-  "dataFilePath": "samples.json"
+  "dataFilePath": "samples.json",
+  "ordersFilePath": "orders.json"
 }
