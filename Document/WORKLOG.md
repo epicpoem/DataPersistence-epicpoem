@@ -317,3 +317,40 @@
 
 ### 다음 작업 지시
 - Negative TC 추가 및 테스트
+
+---
+
+## [2026-06-12] Negative TC 추가 및 빈 ID 검증 수정
+
+### 작업 내용
+- SampleService.cpp: registerSample에 빈 ID 차단 검증 추가 (버그 수정)
+- SampleRepositoryTest.cpp: Negative TC 2건 추가
+  - LoadFromCorruptedFile_ReturnsEmpty: 손상된 JSON 파일 → 빈 목록 반환
+  - SaveDuplicateIds_BothPersisted: Repository는 중복 저장 허용 (Service 레이어 책임 명시)
+- OrderRepositoryTest.cpp: Negative TC 2건 추가
+  - LoadFromCorruptedFile_ReturnsEmpty: 손상된 JSON 파일 → 빈 목록 반환
+  - LoadWithUnknownStatus_DefaultsToReserved: 알 수 없는 상태값 → RESERVED 기본값
+- SampleServiceTest.cpp: Negative TC 2건 추가
+  - RegisterSample_EmptyId_ReturnsFalse: 빈 ID 등록 차단
+  - UpdateSample_NonExistentId_ReturnsFalse: 없는 ID 수정 시 false 반환
+- OrderServiceTest.cpp: Negative TC 3건 추가
+  - PlaceOrder_EmptyCustomerName_ReturnsNullopt
+  - PlaceOrder_ZeroQuantity_ReturnsNullopt
+  - PlaceOrder_NegativeQuantity_ReturnsNullopt
+
+### 커밋
+- `4e071ff` [AI-Fix] 빈 ID 등록 차단 추가 및 Negative TC 9건 추가 (49/49)
+
+### 테스트 결과
+- 전체 49/49 통과
+
+### 리뷰 요청
+- 추가된 Negative TC 범위 및 내용이 적절한지 확인 부탁드립니다.
+- 추가로 필요한 경계값/예외 케이스가 있으면 알려주세요.
+
+---
+### 리뷰 (by User)
+- 테스트 구현 확인
+
+### 다음 작업 지시
+- 리포지토리 최상위에 readme.md 파일 추가, 프로젝트 개요/개발내용/사용법/실행 결과 예시 작성, 이외 필요 내용 작성
