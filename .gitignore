@@ -17,6 +17,12 @@
 # Mono auto generated files
 mono_crash.*
 
+# CMake build directory
+build/
+
+# Runtime data files
+data/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
