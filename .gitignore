@@ -23,6 +23,15 @@ build/
 # Runtime data files
 data/
 
+# VC build output directories
+DataPersistence/DataPersistence/x64/
+DataPersistence/DataPersistence/x86/
+DataPersistence/DataPersistenceTest/x64/
+DataPersistence/DataPersistenceTest/x86/
+
+# Runtime generated JSON data (samples.json은 config.json으로 경로 변경 가능)
+DataPersistence/DataPersistence/DataPersistence/samples.json
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

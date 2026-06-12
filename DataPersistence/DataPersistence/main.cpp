@@ -169,6 +169,7 @@ int main() {
     SetConsoleCP(CP_UTF8);
 
     const std::string dataFilePath = loadDataFilePath();
+    std::cout << "[데이터 저장 경로] " << std::filesystem::absolute(dataFilePath).string() << "\n";
     JsonSampleRepository repo(dataFilePath);
 
     while (true) {
