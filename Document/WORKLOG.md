@@ -224,3 +224,38 @@
 - 위 재고는 실제 재고(물리적 재고)를 의미함
 - SPEC 에 직접 명시되지 않았으나 구현상 필요한 항목임
 - 재고 관련 FEATURE 추가
+
+---
+
+## [2026-06-12] Order/재고 영속성 구현
+
+### 작업 내용
+- Order.h — Order 구조체, OrderStatus enum, statusToString/statusFromString/isValidStatusString 헬퍼 정의
+- OrderRepository.h — OrderRepository 순수 가상 인터페이스
+- JsonOrderRepository.h/cpp — JSON 기반 Order CRUD 구현체 (save/findAll/findById/update/remove/existsById)
+- main.cpp — 주문 CRUD 메뉴([6]~[10]) 및 재고 직접 수정([11]) 추가, config에서 ordersFilePath 로드, 주문번호 자동 생성(ORD-YYYYMMDD-NNNN)
+- config.json — ordersFilePath 필드 추가
+- DataPersistence.vcxproj — 신규 파일 등록
+- OrderRepositoryTest.cpp — 14개 단위 테스트 (Order CRUD + 상태 enum 전체 라운드트립)
+- DataPersistenceTest.vcxproj — OrderRepositoryTest.cpp, JsonOrderRepository.cpp 추가
+
+### 커밋
+- `ff51748` [AI-Feature] Order CRUD 영속성 구현 (OrderRepository, JsonOrderRepository)
+
+### 테스트 결과
+- 전체 27/27 통과 (OrderRepository 14건 + SampleRepository 13건)
+
+### 리뷰 요청
+- 주문/재고 영속성 구현 확인 부탁드립니다.
+- [11] 재고 직접 수정 메뉴가 별도로 필요한지, 아니면 기존 [4] 시료 수정으로 충분한지 의견 주세요.
+- PRODUCING 상태로 전환 시 생산 시작 시간은 현재 시스템 시간으로 자동 설정됩니다.
+
+---
+### 리뷰 (by User)
+- FEATURE 추가 및 기능 구현 확인
+- 주문 등록 동작 확인
+- 재고 직접 수정 메뉴는 별도로 필요함
+
+### 다음 작업 지시
+- 주문 등록시 시료 확인하여 시료 존재하지 않는 주문의 경우 에러처리 추가 필요
+
