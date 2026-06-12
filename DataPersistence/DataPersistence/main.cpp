@@ -1,4 +1,3 @@
-#include <ctime>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -9,6 +8,9 @@
 #include "nlohmann/json.hpp"
 #include "JsonSampleRepository.h"
 #include "JsonOrderRepository.h"
+#include "SampleService.h"
+#include "OrderService.h"
+#include "SystemClock.h"
 
 using json = nlohmann::json;
 
@@ -24,40 +26,6 @@ static std::string loadConfig(const std::string& key, const std::string& default
     } catch (...) {
         return defaultValue;
     }
-}
-
-static std::string getTodayString() {
-    std::time_t t = std::time(nullptr);
-    std::tm tm{};
-    localtime_s(&tm, &t);
-    char buf[9];
-    std::strftime(buf, sizeof(buf), "%Y%m%d", &tm);
-    return buf;
-}
-
-static std::string getNowString() {
-    std::time_t t = std::time(nullptr);
-    std::tm tm{};
-    localtime_s(&tm, &t);
-    char buf[20];
-    std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S", &tm);
-    return buf;
-}
-
-static std::string generateOrderId(OrderRepository& repo) {
-    std::string prefix = "ORD-" + getTodayString() + "-";
-    int maxSeq = 0;
-    for (const auto& o : repo.findAll()) {
-        if (o.id.rfind(prefix, 0) == 0) {
-            try {
-                int seq = std::stoi(o.id.substr(prefix.size()));
-                if (seq > maxSeq) maxSeq = seq;
-            } catch (...) {}
-        }
-    }
-    char seq[5];
-    std::snprintf(seq, sizeof(seq), "%04d", maxSeq + 1);
-    return prefix + seq;
 }
 
 static void printSample(const Sample& s) {
@@ -83,18 +51,20 @@ static void printOrder(const Order& o) {
     }
 }
 
-// ── 시료 CRUD ──────────────────────────────────────────────────────────────
+// ── 시료 메뉴 핸들러 ───────────────────────────────────────────────────────
 
-static void doCreate(SampleRepository& repo) {
-    Sample s;
-    s.stock = 0;
-
+static void doCreate(SampleService& svc) {
+    std::string id;
     std::cout << "시료 ID: ";
-    std::cin >> s.id;
-    if (repo.existsById(s.id)) {
+    std::cin >> id;
+    if (svc.existsById(id)) {
         std::cout << "[오류] 이미 존재하는 ID입니다.\n";
         return;
     }
+
+    Sample s;
+    s.id    = id;
+    s.stock = 0;
 
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "시료 이름: ";
@@ -118,13 +88,13 @@ static void doCreate(SampleRepository& repo) {
         std::cout << "[오류] 0.0 초과 ~ 1.0 이하의 값을 입력하세요: ";
     }
 
-    repo.save(s);
+    svc.registerSample(s);
     std::cout << "[완료] 시료가 등록되었습니다.\n";
     printSample(s);
 }
 
-static void doReadAll(SampleRepository& repo) {
-    auto samples = repo.findAll();
+static void doReadAll(SampleService& svc) {
+    auto samples = svc.listAll();
     if (samples.empty()) {
         std::cout << "등록된 시료가 없습니다.\n";
         return;
@@ -136,12 +106,12 @@ static void doReadAll(SampleRepository& repo) {
     }
 }
 
-static void doReadOne(SampleRepository& repo) {
+static void doReadOne(SampleService& svc) {
     std::string id;
     std::cout << "조회할 시료 ID: ";
     std::cin >> id;
 
-    auto sample = repo.findById(id);
+    auto sample = svc.findById(id);
     if (!sample) {
         std::cout << "[오류] 해당 시료를 찾을 수 없습니다.\n";
         return;
@@ -149,12 +119,12 @@ static void doReadOne(SampleRepository& repo) {
     printSample(*sample);
 }
 
-static void doUpdate(SampleRepository& repo) {
+static void doUpdate(SampleService& svc) {
     std::string id;
     std::cout << "수정할 시료 ID: ";
     std::cin >> id;
 
-    auto existing = repo.findById(id);
+    auto existing = svc.findById(id);
     if (!existing) {
         std::cout << "[오류] 해당 시료를 찾을 수 없습니다.\n";
         return;
@@ -185,17 +155,17 @@ static void doUpdate(SampleRepository& repo) {
     std::cin >> ival;
     if (ival >= 0) updated.stock = ival;
 
-    repo.update(updated);
+    svc.updateSample(updated);
     std::cout << "[완료] 수정되었습니다.\n";
     printSample(updated);
 }
 
-static void doDelete(SampleRepository& repo) {
+static void doDelete(SampleService& svc) {
     std::string id;
     std::cout << "삭제할 시료 ID: ";
     std::cin >> id;
 
-    auto existing = repo.findById(id);
+    auto existing = svc.findById(id);
     if (!existing) {
         std::cout << "[오류] 해당 시료를 찾을 수 없습니다.\n";
         return;
@@ -208,49 +178,48 @@ static void doDelete(SampleRepository& repo) {
     std::cin >> confirm;
 
     if (confirm == 'Y' || confirm == 'y') {
-        repo.remove(id);
+        svc.removeSample(id);
         std::cout << "[완료] 시료가 삭제되었습니다.\n";
     } else {
         std::cout << "삭제가 취소되었습니다.\n";
     }
 }
 
-// ── 주문 CRUD ──────────────────────────────────────────────────────────────
+// ── 주문 메뉴 핸들러 ───────────────────────────────────────────────────────
 
-static void doCreateOrder(OrderRepository& orderRepo, SampleRepository& sampleRepo) {
-    Order o;
+static void doCreateOrder(OrderService& svc) {
+    std::string sampleId, customerName;
+    int quantity;
 
     std::cout << "시료 ID: ";
-    std::cin >> o.sampleId;
-    if (!sampleRepo.existsById(o.sampleId)) {
-        std::cout << "[오류] 존재하지 않는 시료 ID입니다.\n";
-        return;
-    }
+    std::cin >> sampleId;
 
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "고객명: ";
-    std::getline(std::cin, o.customerName);
-    if (o.customerName.empty()) {
+    std::getline(std::cin, customerName);
+    if (customerName.empty()) {
         std::cout << "[오류] 고객명을 입력해야 합니다.\n";
         return;
     }
 
     std::cout << "주문 수량 (1 이상): ";
-    while (!(std::cin >> o.quantity) || o.quantity < 1) {
+    while (!(std::cin >> quantity) || quantity < 1) {
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::cout << "[오류] 1 이상의 값을 입력하세요: ";
     }
 
-    o.id = generateOrderId(orderRepo);
-    o.status = OrderStatus::RESERVED;
-    orderRepo.save(o);
+    auto result = svc.placeOrder(sampleId, customerName, quantity);
+    if (!result) {
+        std::cout << "[오류] 존재하지 않는 시료 ID입니다.\n";
+        return;
+    }
     std::cout << "[완료] 주문이 등록되었습니다.\n";
-    printOrder(o);
+    printOrder(*result);
 }
 
-static void doReadAllOrders(OrderRepository& repo) {
-    auto orders = repo.findAll();
+static void doReadAllOrders(OrderService& svc) {
+    auto orders = svc.listAll();
     if (orders.empty()) {
         std::cout << "등록된 주문이 없습니다.\n";
         return;
@@ -262,12 +231,12 @@ static void doReadAllOrders(OrderRepository& repo) {
     }
 }
 
-static void doReadOneOrder(OrderRepository& repo) {
+static void doReadOneOrder(OrderService& svc) {
     std::string id;
     std::cout << "조회할 주문번호: ";
     std::cin >> id;
 
-    auto order = repo.findById(id);
+    auto order = svc.findById(id);
     if (!order) {
         std::cout << "[오류] 해당 주문을 찾을 수 없습니다.\n";
         return;
@@ -275,12 +244,12 @@ static void doReadOneOrder(OrderRepository& repo) {
     printOrder(*order);
 }
 
-static void doUpdateOrder(OrderRepository& repo) {
+static void doUpdateOrder(OrderService& svc) {
     std::string id;
     std::cout << "수정할 주문번호: ";
     std::cin >> id;
 
-    auto existing = repo.findById(id);
+    auto existing = svc.findById(id);
     if (!existing) {
         std::cout << "[오류] 해당 주문을 찾을 수 없습니다.\n";
         return;
@@ -289,49 +258,48 @@ static void doUpdateOrder(OrderRepository& repo) {
     std::cout << "현재 정보:\n";
     printOrder(*existing);
 
-    Order updated = *existing;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
     std::cout << "새 상태 (RESERVED/REJECTED/PRODUCING/CONFIRMED/RELEASE, 엔터 시 유지): ";
     std::string statusInput;
     std::getline(std::cin, statusInput);
-    if (!statusInput.empty()) {
-        if (!isValidStatusString(statusInput)) {
-            std::cout << "[오류] 유효하지 않은 상태값입니다.\n";
-            return;
-        }
-        updated.status = statusFromString(statusInput);
+    if (statusInput.empty()) return;
 
-        if (updated.status == OrderStatus::PRODUCING) {
-            updated.productionStartTime = getNowString();
-            std::cout << "실제 생산 수량 (0 이상): ";
-            while (!(std::cin >> updated.actualProductionQuantity) ||
-                   updated.actualProductionQuantity < 0) {
-                std::cin.clear();
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                std::cout << "[오류] 0 이상의 값을 입력하세요: ";
-            }
-            std::cout << "총 생산 시간 (분, 0 초과): ";
-            while (!(std::cin >> updated.totalProductionTime) ||
-                   updated.totalProductionTime <= 0.0) {
-                std::cin.clear();
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                std::cout << "[오류] 0보다 큰 값을 입력하세요: ";
-            }
+    if (!isValidStatusString(statusInput)) {
+        std::cout << "[오류] 유효하지 않은 상태값입니다.\n";
+        return;
+    }
+
+    OrderStatus newStatus = statusFromString(statusInput);
+    int actualQty = 0;
+    double totalTime = 0.0;
+
+    if (newStatus == OrderStatus::PRODUCING) {
+        std::cout << "실제 생산 수량 (0 이상): ";
+        while (!(std::cin >> actualQty) || actualQty < 0) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "[오류] 0 이상의 값을 입력하세요: ";
+        }
+        std::cout << "총 생산 시간 (분, 0 초과): ";
+        while (!(std::cin >> totalTime) || totalTime <= 0.0) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "[오류] 0보다 큰 값을 입력하세요: ";
         }
     }
 
-    repo.update(updated);
+    svc.transitionStatus(id, newStatus, actualQty, totalTime);
+    auto updated = svc.findById(id);
     std::cout << "[완료] 주문이 수정되었습니다.\n";
-    printOrder(updated);
+    if (updated) printOrder(*updated);
 }
 
-static void doDeleteOrder(OrderRepository& repo) {
+static void doDeleteOrder(OrderService& svc) {
     std::string id;
     std::cout << "삭제할 주문번호: ";
     std::cin >> id;
 
-    auto existing = repo.findById(id);
+    auto existing = svc.findById(id);
     if (!existing) {
         std::cout << "[오류] 해당 주문을 찾을 수 없습니다.\n";
         return;
@@ -344,21 +312,21 @@ static void doDeleteOrder(OrderRepository& repo) {
     std::cin >> confirm;
 
     if (confirm == 'Y' || confirm == 'y') {
-        repo.remove(id);
+        svc.removeOrder(id);
         std::cout << "[완료] 주문이 삭제되었습니다.\n";
     } else {
         std::cout << "삭제가 취소되었습니다.\n";
     }
 }
 
-// ── 재고 직접 수정 ─────────────────────────────────────────────────────────
+// ── 재고 메뉴 핸들러 ───────────────────────────────────────────────────────
 
-static void doUpdateStock(SampleRepository& repo) {
+static void doUpdateStock(SampleService& svc) {
     std::string id;
     std::cout << "재고 수정할 시료 ID: ";
     std::cin >> id;
 
-    auto existing = repo.findById(id);
+    auto existing = svc.findById(id);
     if (!existing) {
         std::cout << "[오류] 해당 시료를 찾을 수 없습니다.\n";
         return;
@@ -373,9 +341,7 @@ static void doUpdateStock(SampleRepository& repo) {
         std::cout << "[오류] 0 이상의 값을 입력하세요: ";
     }
 
-    Sample updated = *existing;
-    updated.stock = newStock;
-    repo.update(updated);
+    svc.updateStock(id, newStock);
     std::cout << "[완료] 재고가 수정되었습니다. 현재 재고: " << newStock << " ea\n";
 }
 
@@ -394,6 +360,10 @@ int main() {
 
     JsonSampleRepository sampleRepo(samplesFilePath);
     JsonOrderRepository  orderRepo(ordersFilePath);
+    SystemClock          clock;
+
+    SampleService sampleSvc(sampleRepo);
+    OrderService  orderSvc(orderRepo, sampleRepo, clock);
 
     while (true) {
         std::cout << "\n=== 시료 관리 시스템 (DataPersistence PoC) ===\n"
@@ -423,17 +393,17 @@ int main() {
         }
 
         switch (choice) {
-            case 1:  doCreate(sampleRepo);       break;
-            case 2:  doReadAll(sampleRepo);      break;
-            case 3:  doReadOne(sampleRepo);      break;
-            case 4:  doUpdate(sampleRepo);       break;
-            case 5:  doDelete(sampleRepo);       break;
-            case 6:  doCreateOrder(orderRepo, sampleRepo); break;
-            case 7:  doReadAllOrders(orderRepo); break;
-            case 8:  doReadOneOrder(orderRepo);  break;
-            case 9:  doUpdateOrder(orderRepo);   break;
-            case 10: doDeleteOrder(orderRepo);   break;
-            case 11: doUpdateStock(sampleRepo);  break;
+            case 1:  doCreate(sampleSvc);          break;
+            case 2:  doReadAll(sampleSvc);         break;
+            case 3:  doReadOne(sampleSvc);         break;
+            case 4:  doUpdate(sampleSvc);          break;
+            case 5:  doDelete(sampleSvc);          break;
+            case 6:  doCreateOrder(orderSvc);      break;
+            case 7:  doReadAllOrders(orderSvc);    break;
+            case 8:  doReadOneOrder(orderSvc);     break;
+            case 9:  doUpdateOrder(orderSvc);      break;
+            case 10: doDeleteOrder(orderSvc);      break;
+            case 11: doUpdateStock(sampleSvc);     break;
             case 0:  std::cout << "종료합니다.\n"; return 0;
             default: std::cout << "잘못된 입력입니다.\n";
         }

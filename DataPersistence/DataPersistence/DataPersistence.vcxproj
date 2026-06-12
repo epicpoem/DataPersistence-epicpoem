@@ -148,16 +148,22 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="IClock.h" />
     <ClInclude Include="JsonOrderRepository.h" />
     <ClInclude Include="JsonSampleRepository.h" />
     <ClInclude Include="Order.h" />
     <ClInclude Include="OrderRepository.h" />
+    <ClInclude Include="OrderService.h" />
     <ClInclude Include="Sample.h" />
     <ClInclude Include="SampleRepository.h" />
+    <ClInclude Include="SampleService.h" />
+    <ClInclude Include="SystemClock.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="JsonOrderRepository.cpp" />
     <ClCompile Include="JsonSampleRepository.cpp" />
+    <ClCompile Include="OrderService.cpp" />
+    <ClCompile Include="SampleService.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

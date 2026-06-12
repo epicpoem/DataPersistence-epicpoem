@@ -126,9 +126,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="OrderRepositoryTest.cpp" />
+    <ClCompile Include="OrderServiceTest.cpp" />
     <ClCompile Include="SampleRepositoryTest.cpp" />
+    <ClCompile Include="SampleServiceTest.cpp" />
     <ClCompile Include="..\DataPersistence\JsonOrderRepository.cpp" />
     <ClCompile Include="..\DataPersistence\JsonSampleRepository.cpp" />
+    <ClCompile Include="..\DataPersistence\OrderService.cpp" />
+    <ClCompile Include="..\DataPersistence\SampleService.cpp" />
     <ClCompile Include="..\packages\gmock.1.11.0\lib\native\src\gmock\src\gmock_main.cc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
