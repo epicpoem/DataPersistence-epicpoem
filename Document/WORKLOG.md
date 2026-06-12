@@ -281,3 +281,39 @@
 
 ### 다음 작업 지시
 - 현재 CURD 기능을 활용하여 추가 기능들 구현되어야 함. 구현에 용이하도록 리팩토링 수행
+
+---
+
+## [2026-06-12] 서비스 레이어 리팩토링
+
+### 작업 내용
+- IClock.h — 시간 추상화 인터페이스 (today/now)
+- SystemClock.h — 실제 시스템 시간 구현체 (헤더 전용)
+- SampleService.h/cpp — Sample 비즈니스 로직 레이어
+  - registerSample: 중복 ID 차단
+  - updateSample: 음수 재고 차단
+  - updateStock: 대상 시료 존재 검증 + 음수 차단
+- OrderService.h/cpp — Order 비즈니스 로직 레이어
+  - placeOrder: 시료 존재 검증 + 주문번호 자동 생성 (ORD-YYYYMMDD-NNNN, clock 주입)
+  - transitionStatus: PRODUCING 전환 시 생산 시작 시간 자동 기록 (clock 주입)
+- main.cpp — Repository 직접 참조 제거, Service 레이어 사용으로 교체
+- SampleServiceTest.cpp — Mock 기반 SampleService 단위 테스트 6건
+- OrderServiceTest.cpp — Mock + FakeClock 기반 OrderService 단위 테스트 7건
+
+### 커밋
+- `97fd3be` [AI-Refactoring] 서비스 레이어 도입 (SampleService, OrderService, IClock/SystemClock)
+
+### 테스트 결과
+- 전체 40/40 통과 (Repository 27건 + Service 13건)
+
+### 리뷰 요청
+- Repository → Service → CLI 3계층 구조 방향이 적절한지 확인 부탁드립니다.
+- IClock 추상화로 테스트 시 FakeClock 주입이 가능하며, SampleOrderSystem 구현 시에도 동일 패턴 활용 가능합니다.
+
+---
+### 리뷰 (by User)
+- 현재 계층은 POC 수준에서는 적절, 이후 통합시 내용 적절한지 재확인 예정
+- IClock 추상화 확인
+
+### 다음 작업 지시
+- Negative TC 추가 및 테스트
