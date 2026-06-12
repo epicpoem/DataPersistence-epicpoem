@@ -79,3 +79,35 @@
 
 ### 다음 작업 지시
 - 코드 구현 시작
+
+
+---
+
+## [2026-06-12] C++ 프로젝트 초기 구성 및 CRUD 구현
+
+### 작업 내용
+- CMakeLists.txt 작성 (C++17, Ninja, FetchContent로 nlohmann/json + GoogleTest 자동 다운로드)
+- include/Sample.h — Sample 구조체 정의
+- include/SampleRepository.h — 저장소 인터페이스 (순수 가상 함수)
+- include/JsonSampleRepository.h — JSON 구현체 헤더
+- src/JsonSampleRepository.cpp — JSON CRUD 구현 (std::filesystem 활용)
+- src/main.cpp — CLI 메뉴 (등록/전체조회/단건조회/수정/삭제), config/config.json 에서 파일 경로 로드
+- test/SampleRepositoryTest.cpp — 13개 단위 테스트 (전체 통과)
+- config/config.json — 데이터 파일 경로 설정
+- .gitignore — build/, data/ 추가
+
+### 커밋
+- `aebbac3` [AI-Chore] CMake 프로젝트 초기 구성 (C++17, Ninja, FetchContent)
+
+### 리뷰 요청
+- 전체 구조(Repository 인터페이스 분리, config 경로 로드) 방향이 적절한지 확인 부탁드립니다.
+- 빌드 방법: VS 개발자 환경에서 cmake -G Ninja -B build && cmake --build build
+- 테스트 실행: build/DataPersistence_test.exe (13/13 통과 확인)
+
+---
+### 리뷰 (by User)
+- 전체 구조 확인
+- 기존 프로젝트상 구현 필요하나 별도 구현됨
+
+### 다음 작업 지시
+- 현재 구현체 삭제하고, C:\reviewer\PersonnelProject\DataPersistence\DataPersistence 내부의 VC 프로젝트에서 작업
