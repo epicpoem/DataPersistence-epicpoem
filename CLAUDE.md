@@ -155,6 +155,11 @@ WORKLOG 파일 위치: `Document/WORKLOG.md`
 [USER-Review] 사용자 리뷰 반영 - 시료 검색 기능 수정 요청
 ```
 
+### WORKLOG 작성 순서 규칙
+
+- **새 항목은 항상 파일 맨 아래에 추가한다** (오래된 항목이 위, 최신 항목이 아래).
+- 최신순 정렬(위에 추가)하지 않는다.
+
 ### WORKLOG 작성 형식
 ```markdown
 ## [YYYY-MM-DD] {작업 제목}
