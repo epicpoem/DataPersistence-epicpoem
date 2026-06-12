@@ -113,7 +113,8 @@ PRD.md 작성 → FEATURES/ 각 파일 작성 → 커밋 → 사용자 리뷰 �
 WORKLOG 파일 위치: `Document/WORKLOG.md`
 
 ```
-1. 작업 시작 전     → Document/WORKLOG.md 열어 최신 [USER-Review] 내용 확인
+1. 작업 시작 전     → Document/WORKLOG.md 열어 최신 내용 확인
+                      사용자가 수정한 내용(리뷰/다음 지시)이 있으면 [USER-Review] 헤더로 커밋 후 작업 시작
 2. 작업 및 커밋     → 기능 단위로 [AI-xxx] 헤더로 커밋
 3. WORKLOG 업데이트 → 작업 내용 요약, 커밋 해시, 리뷰 요청사항 기록 (커밋 안 함)
 4. 사용자 리뷰      → 사용자가 WORKLOG에 피드백/다음 지시 작성
@@ -121,6 +122,15 @@ WORKLOG 파일 위치: `Document/WORKLOG.md`
 6. 다음 작업        → [USER-Review] 내용 기반으로 작업 후 [AI-xxx] 커밋
 7. 3번으로 반복
 ```
+
+### 작업 시작 시 WORKLOG 처리 규칙
+
+매 작업 시작 전 반드시 아래 순서로 처리한다:
+
+1. `Document/WORKLOG.md` 를 읽는다.
+2. 사용자가 작성한 미커밋 내용(리뷰, 다음 작업 지시 등)이 있는지 확인한다.
+3. 미커밋 내용이 있으면 **먼저** `[USER-Review]` 헤더로 커밋한다.
+4. 커밋 완료 후 지시 내용에 따라 작업을 시작한다.
 
 ### 커밋 메시지 컨벤션
 
