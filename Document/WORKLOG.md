@@ -195,3 +195,32 @@
 
 ### 다음 작업 지시
 - 시료 이외, 주문/재고 등 내부 나머지 모든 데이터들에 대해서도 영속성 필요. 해당 내용들 요구사항에 추가 및 문서 업데이트
+
+---
+
+## [2026-06-12] Order 영속성 요구사항 문서 추가
+
+### 작업 내용
+- Document/PRD.md 업데이트: Order 엔티티 추가, 주문 등록/조회/수정/삭제 요구사항 기술, Out of Scope 수정
+- Document/FEATURES/FEATURE-05-order-create.md 작성 — 주문 등록 기능 요구사항
+- Document/FEATURES/FEATURE-06-order-read.md 작성 — 주문 조회(전체/단건) 기능 요구사항
+- Document/FEATURES/FEATURE-07-order-update.md 작성 — 주문 상태 및 생산 정보 수정 기능 요구사항
+- Document/FEATURES/FEATURE-08-order-delete.md 작성 — 주문 삭제 기능 요구사항
+
+### 커밋
+- `98e84c9` [AI-Docs] Add Order persistence requirements to PRD and FEATURES
+
+### 리뷰 요청
+- PRD 2-6~2-10 (주문 관련 요구사항) 및 FEATURE-05~08 파일 내용이 적절한지 확인 부탁드립니다.
+- 재고(stock)는 Sample 엔티티 필드이므로 별도 엔티티로 분리하지 않았습니다. 이 판단이 맞는지 확인 부탁드립니다.
+- 승인 시 Order 영속성 코드 구현을 시작하겠습니다.
+
+---
+### 리뷰 (by User)
+- 주문 관련 추가 내용 적절 확인
+
+### 다음 작업 지시
+- 재고도 영속성에 포함되는 항목, 저장 방법이 있어야 함
+- 위 재고는 실제 재고(물리적 재고)를 의미함
+- SPEC 에 직접 명시되지 않았으나 구현상 필요한 항목임
+- 재고 관련 FEATURE 추가
