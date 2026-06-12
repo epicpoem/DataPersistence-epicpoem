@@ -3,6 +3,8 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#define NOMINMAX
+#include <windows.h>
 #include "nlohmann/json.hpp"
 #include "JsonSampleRepository.h"
 
@@ -163,6 +165,9 @@ static void doDelete(SampleRepository& repo) {
 }
 
 int main() {
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+
     const std::string dataFilePath = loadDataFilePath();
     JsonSampleRepository repo(dataFilePath);
 
@@ -178,6 +183,7 @@ int main() {
 
         int choice;
         if (!(std::cin >> choice)) {
+            if (std::cin.eof()) break;
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             continue;
