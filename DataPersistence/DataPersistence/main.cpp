@@ -3,13 +3,13 @@
 #include <iostream>
 #include <limits>
 #include <string>
-#include <nlohmann/json.hpp>
+#include "nlohmann/json.hpp"
 #include "JsonSampleRepository.h"
 
 using json = nlohmann::json;
 
-static std::string loadDataFilePath(const std::string& configPath = "config/config.json") {
-    const std::string defaultPath = "data/samples.json";
+static std::string loadDataFilePath(const std::string& configPath = "config.json") {
+    const std::string defaultPath = "samples.json";
     if (!std::filesystem::exists(configPath)) return defaultPath;
 
     std::ifstream f(configPath);
@@ -111,8 +111,8 @@ static void doUpdate(SampleRepository& repo) {
     printSample(*existing);
 
     Sample updated = *existing;
-
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
     std::cout << "새 이름 (엔터 시 유지): ";
     std::string input;
     std::getline(std::cin, input);

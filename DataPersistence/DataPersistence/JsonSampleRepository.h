@@ -1,7 +1,6 @@
 #pragma once
 #include "SampleRepository.h"
 #include <string>
-#include <vector>
 
 class JsonSampleRepository : public SampleRepository {
 public:

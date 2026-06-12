@@ -20,7 +20,7 @@ protected:
     std::unique_ptr<JsonSampleRepository> repo;
 
     static Sample make(const std::string& id,
-                       const std::string& name = "테스트 시료",
+                       const std::string& name = "Test Sample",
                        double avgProdTime = 1.0,
                        double yield = 0.9,
                        int stock = 0) {
@@ -28,7 +28,7 @@ protected:
     }
 };
 
-// ── Create ──────────────────────────────────────────────────────────────────
+// Create
 
 TEST_F(JsonSampleRepositoryTest, SaveStoresNewSample) {
     repo->save(make("S-001"));
@@ -36,15 +36,15 @@ TEST_F(JsonSampleRepositoryTest, SaveStoresNewSample) {
 }
 
 TEST_F(JsonSampleRepositoryTest, SavePersistsAcrossInstances) {
-    repo->save(make("S-001", "실리콘 웨이퍼"));
+    repo->save(make("S-001", "Silicon Wafer"));
 
     JsonSampleRepository repo2(TEST_FILE);
     auto result = repo2.findById("S-001");
     ASSERT_TRUE(result.has_value());
-    EXPECT_EQ(result->name, "실리콘 웨이퍼");
+    EXPECT_EQ(result->name, "Silicon Wafer");
 }
 
-// ── Read ─────────────────────────────────────────────────────────────────────
+// Read
 
 TEST_F(JsonSampleRepositoryTest, FindAllReturnsEmptyWhenNoData) {
     EXPECT_TRUE(repo->findAll().empty());
@@ -57,30 +57,30 @@ TEST_F(JsonSampleRepositoryTest, FindAllReturnsAllSavedSamples) {
 }
 
 TEST_F(JsonSampleRepositoryTest, FindByIdReturnsCorrectSample) {
-    repo->save(make("S-001", "웨이퍼A"));
-    repo->save(make("S-002", "웨이퍼B"));
+    repo->save(make("S-001", "WaferA"));
+    repo->save(make("S-002", "WaferB"));
 
     auto result = repo->findById("S-002");
     ASSERT_TRUE(result.has_value());
-    EXPECT_EQ(result->name, "웨이퍼B");
+    EXPECT_EQ(result->name, "WaferB");
 }
 
 TEST_F(JsonSampleRepositoryTest, FindByIdReturnsNulloptWhenNotFound) {
     EXPECT_FALSE(repo->findById("NOT_EXIST").has_value());
 }
 
-// ── Update ────────────────────────────────────────────────────────────────────
+// Update
 
 TEST_F(JsonSampleRepositoryTest, UpdateChangesExistingSample) {
-    repo->save(make("S-001", "원본"));
+    repo->save(make("S-001", "Original"));
 
-    Sample updated = make("S-001", "수정됨");
+    Sample updated = make("S-001", "Modified");
     updated.stock = 100;
     EXPECT_TRUE(repo->update(updated));
 
     auto result = repo->findById("S-001");
     ASSERT_TRUE(result.has_value());
-    EXPECT_EQ(result->name, "수정됨");
+    EXPECT_EQ(result->name, "Modified");
     EXPECT_EQ(result->stock, 100);
 }
 
@@ -88,7 +88,7 @@ TEST_F(JsonSampleRepositoryTest, UpdateReturnsFalseWhenNotFound) {
     EXPECT_FALSE(repo->update(make("NOT_EXIST")));
 }
 
-// ── Delete ────────────────────────────────────────────────────────────────────
+// Delete
 
 TEST_F(JsonSampleRepositoryTest, RemoveDeletesExistingSample) {
     repo->save(make("S-001"));
@@ -109,7 +109,7 @@ TEST_F(JsonSampleRepositoryTest, RemoveDoesNotAffectOtherSamples) {
     EXPECT_EQ(repo->findAll().size(), 1u);
 }
 
-// ── ExistsById ────────────────────────────────────────────────────────────────
+// ExistsById
 
 TEST_F(JsonSampleRepositoryTest, ExistsByIdReturnsTrueForSavedId) {
     repo->save(make("S-001"));
