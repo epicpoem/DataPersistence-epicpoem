@@ -217,11 +217,15 @@ static void doDelete(SampleRepository& repo) {
 
 // ── 주문 CRUD ──────────────────────────────────────────────────────────────
 
-static void doCreateOrder(OrderRepository& repo) {
+static void doCreateOrder(OrderRepository& orderRepo, SampleRepository& sampleRepo) {
     Order o;
 
     std::cout << "시료 ID: ";
     std::cin >> o.sampleId;
+    if (!sampleRepo.existsById(o.sampleId)) {
+        std::cout << "[오류] 존재하지 않는 시료 ID입니다.\n";
+        return;
+    }
 
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "고객명: ";
@@ -238,9 +242,9 @@ static void doCreateOrder(OrderRepository& repo) {
         std::cout << "[오류] 1 이상의 값을 입력하세요: ";
     }
 
-    o.id = generateOrderId(repo);
+    o.id = generateOrderId(orderRepo);
     o.status = OrderStatus::RESERVED;
-    repo.save(o);
+    orderRepo.save(o);
     std::cout << "[완료] 주문이 등록되었습니다.\n";
     printOrder(o);
 }
@@ -424,7 +428,7 @@ int main() {
             case 3:  doReadOne(sampleRepo);      break;
             case 4:  doUpdate(sampleRepo);       break;
             case 5:  doDelete(sampleRepo);       break;
-            case 6:  doCreateOrder(orderRepo);   break;
+            case 6:  doCreateOrder(orderRepo, sampleRepo); break;
             case 7:  doReadAllOrders(orderRepo); break;
             case 8:  doReadOneOrder(orderRepo);  break;
             case 9:  doUpdateOrder(orderRepo);   break;
