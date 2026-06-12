@@ -3,6 +3,6 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="DataPersistence/DataPersistence.vcxproj" />
-  <Project Path="DataPersistenceTest/DataPersistenceTest.vcxproj" />
+  <Project Path="DataPersistence/DataPersistence.vcxproj" Id="214a98c7-48e8-4138-9dda-118cdaefc1e0" />
+  <Project Path="DataPersistenceTest/DataPersistenceTest.vcxproj" Id="a1b2c3d4-e5f6-7890-abcd-ef1234567890" />
 </Solution>

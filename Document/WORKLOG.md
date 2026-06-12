@@ -111,3 +111,36 @@
 
 ### 다음 작업 지시
 - 현재 구현체 삭제하고, C:\reviewer\PersonnelProject\DataPersistence\DataPersistence 내부의 VC 프로젝트에서 작업
+
+
+---
+
+## [2026-06-12] VC 프로젝트로 이전 및 CRUD 구현
+
+### 작업 내용
+- CMake 구현체 제거 (CMakeLists.txt, include/, src/, test/, config/)
+- 기존 VC 프로젝트(DataPersistence/DataPersistence/)에 구현 이전
+  - Sample.h, SampleRepository.h, JsonSampleRepository.h/cpp, main.cpp 작성
+  - nlohmann/json v3.11.3 단일 헤더 다운로드 (DataPersistence/nlohmann/json.hpp)
+  - DataPersistence.vcxproj, .filters 에 신규 파일 등록
+- 테스트 프로젝트 신규 생성 (DataPersistenceTest/)
+  - DataPersistenceTest.vcxproj - gmock.1.11.0 NuGet 패키지 참조, JsonSampleRepository.cpp 공유
+  - SampleRepositoryTest.cpp - 13개 단위 테스트 (전체 통과)
+- DataPersistence.slnx에 테스트 프로젝트 추가
+
+### 커밋
+- `d4a62ce` [AI-Chore] CMake 구현체 제거 후 기존 VC 프로젝트로 이전
+
+### 리뷰 요청
+- VC 프로젝트 구조 및 테스트 프로젝트 분리 방식 확인 부탁드립니다.
+- 빌드: MSBuild 또는 Visual Studio에서 DataPersistence.slnx 열기
+- 테스트 실행: DataPersistenceTest/x64/Debug/DataPersistenceTest.exe (13/13 통과)
+
+---
+### 리뷰 (by User)
+- VC 상에서 빌드 정상적 수행 확인
+- 테스트 프로젝트 구성 확인
+
+### 다음 작업 지시
+- 콘솔 출력창 한글 인코딩 깨짐. 수정 개발 수행
+- 현재 프로젝트 구조에는 이견 없음. 테스트 프로젝트의 경우, 다음부터 직접 빌드/테스트 후 내용 포함하여 worklog 작성
