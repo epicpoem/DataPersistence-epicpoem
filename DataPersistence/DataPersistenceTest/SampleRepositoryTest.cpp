@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <filesystem>
+#include <fstream>
 #include "JsonSampleRepository.h"
 
 namespace fs = std::filesystem;
@@ -118,4 +119,19 @@ TEST_F(JsonSampleRepositoryTest, ExistsByIdReturnsTrueForSavedId) {
 
 TEST_F(JsonSampleRepositoryTest, ExistsByIdReturnsFalseForMissingId) {
     EXPECT_FALSE(repo->existsById("S-001"));
+}
+
+// Negative / edge-case
+
+TEST_F(JsonSampleRepositoryTest, LoadFromCorruptedFile_ReturnsEmpty) {
+    { std::ofstream f(TEST_FILE); f << "{ not valid json !!!"; }
+    JsonSampleRepository repo2(TEST_FILE);
+    EXPECT_TRUE(repo2.findAll().empty());
+}
+
+TEST_F(JsonSampleRepositoryTest, SaveDuplicateIds_BothPersisted) {
+    // Repository has no duplicate guard — that is enforced by SampleService.
+    repo->save(make("S-001", "First"));
+    repo->save(make("S-001", "Second"));
+    EXPECT_EQ(repo->findAll().size(), 2u);
 }

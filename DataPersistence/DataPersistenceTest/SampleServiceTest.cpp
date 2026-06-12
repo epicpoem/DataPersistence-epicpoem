@@ -85,3 +85,24 @@ TEST(SampleServiceTest, UpdateSample_NegativeStock_ReturnsFalseWithoutUpdate) {
     Sample s = makeSample("S-001", -5);
     EXPECT_FALSE(svc.updateSample(s));
 }
+
+// Negative / edge-case
+
+TEST(SampleServiceTest, RegisterSample_EmptyId_ReturnsFalse) {
+    MockSampleRepository mockRepo;
+    SampleService svc(mockRepo);
+
+    EXPECT_CALL(mockRepo, existsById(_)).Times(0);
+    EXPECT_CALL(mockRepo, save(_)).Times(0);
+
+    EXPECT_FALSE(svc.registerSample(makeSample("")));
+}
+
+TEST(SampleServiceTest, UpdateSample_NonExistentId_ReturnsFalse) {
+    MockSampleRepository mockRepo;
+    SampleService svc(mockRepo);
+
+    EXPECT_CALL(mockRepo, update(_)).WillOnce(Return(false));
+
+    EXPECT_FALSE(svc.updateSample(makeSample("NOT_EXIST", 0)));
+}

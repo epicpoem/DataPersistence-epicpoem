@@ -154,3 +154,41 @@ TEST(OrderServiceTest, TransitionStatus_InvalidId_ReturnsFalse) {
 
     EXPECT_FALSE(svc.transitionStatus("NOT_EXIST", OrderStatus::REJECTED));
 }
+
+// Negative / edge-case
+
+TEST(OrderServiceTest, PlaceOrder_EmptyCustomerName_ReturnsNullopt) {
+    MockOrderRepository  mockOrderRepo;
+    MockSampleRepository mockSampleRepo;
+    FakeClock clock("20260612", "2026-06-12T10:00:00");
+    OrderService svc(mockOrderRepo, mockSampleRepo, clock);
+
+    EXPECT_CALL(mockSampleRepo, existsById("S-001")).WillOnce(Return(true));
+    EXPECT_CALL(mockOrderRepo,  save(_)).Times(0);
+
+    EXPECT_FALSE(svc.placeOrder("S-001", "", 100).has_value());
+}
+
+TEST(OrderServiceTest, PlaceOrder_ZeroQuantity_ReturnsNullopt) {
+    MockOrderRepository  mockOrderRepo;
+    MockSampleRepository mockSampleRepo;
+    FakeClock clock("20260612", "2026-06-12T10:00:00");
+    OrderService svc(mockOrderRepo, mockSampleRepo, clock);
+
+    EXPECT_CALL(mockSampleRepo, existsById("S-001")).WillOnce(Return(true));
+    EXPECT_CALL(mockOrderRepo,  save(_)).Times(0);
+
+    EXPECT_FALSE(svc.placeOrder("S-001", "ACME", 0).has_value());
+}
+
+TEST(OrderServiceTest, PlaceOrder_NegativeQuantity_ReturnsNullopt) {
+    MockOrderRepository  mockOrderRepo;
+    MockSampleRepository mockSampleRepo;
+    FakeClock clock("20260612", "2026-06-12T10:00:00");
+    OrderService svc(mockOrderRepo, mockSampleRepo, clock);
+
+    EXPECT_CALL(mockSampleRepo, existsById("S-001")).WillOnce(Return(true));
+    EXPECT_CALL(mockOrderRepo,  save(_)).Times(0);
+
+    EXPECT_FALSE(svc.placeOrder("S-001", "ACME", -5).has_value());
+}

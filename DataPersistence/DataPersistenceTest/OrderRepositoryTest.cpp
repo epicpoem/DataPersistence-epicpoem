@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <filesystem>
+#include <fstream>
 #include "JsonOrderRepository.h"
 
 namespace fs = std::filesystem;
@@ -131,6 +132,29 @@ TEST_F(JsonOrderRepositoryTest, ExistsByIdReturnsTrueForSavedId) {
 
 TEST_F(JsonOrderRepositoryTest, ExistsByIdReturnsFalseForMissingId) {
     EXPECT_FALSE(repo->existsById("ORD-20260612-0001"));
+}
+
+// Status persistence
+
+// Negative / edge-case
+
+TEST_F(JsonOrderRepositoryTest, LoadFromCorruptedFile_ReturnsEmpty) {
+    { std::ofstream f(TEST_FILE); f << "[ bad json !!!"; }
+    JsonOrderRepository repo2(TEST_FILE);
+    EXPECT_TRUE(repo2.findAll().empty());
+}
+
+TEST_F(JsonOrderRepositoryTest, LoadWithUnknownStatus_DefaultsToReserved) {
+    {
+        std::ofstream f(TEST_FILE);
+        f << R"([{"id":"ORD-1","sampleId":"S-1","customerName":"X","quantity":1,)"
+          << R"("status":"UNKNOWN","actualProductionQuantity":0,)"
+          << R"("productionStartTime":"","totalProductionTime":0.0}])";
+    }
+    JsonOrderRepository repo2(TEST_FILE);
+    auto all = repo2.findAll();
+    ASSERT_EQ(all.size(), 1u);
+    EXPECT_EQ(all[0].status, OrderStatus::RESERVED);
 }
 
 // Status persistence

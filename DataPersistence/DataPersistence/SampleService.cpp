@@ -3,6 +3,7 @@
 SampleService::SampleService(SampleRepository& repo) : repo_(repo) {}
 
 bool SampleService::registerSample(const Sample& sample) {
+    if (sample.id.empty()) return false;
     if (repo_.existsById(sample.id)) return false;
     repo_.save(sample);
     return true;
